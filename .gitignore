@@ -1,0 +1,15 @@
+# dependencies
+node_modules
+
+# environment files
+.env
+
+# build output
+dist
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# test coverage
+coverage
