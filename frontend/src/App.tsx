@@ -1,122 +1,101 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import type { Equipment } from "./types";
+import { fetchEquipment } from "./api/equipment";
+import EquipmentFilters from "./components/EquipmentFilters";
+import EquipmentTable from "./components/EquipmentTable";
+import EquipmentDetail from "./components/EquipmentDetail";
 
-function App() {
-  const [count, setCount] = useState(0)
+//Equipment list page
+function EquipmentListPage() {
+  const navigate = useNavigate();
+
+  //data state
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+
+  //filter state
+  const [type, setType] = useState<string>("");
+  const [make, setMake] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+
+  //fetch from API when type or make changes
+  // search is handled client side with useMemo
+  useEffect(() => {
+    fetchEquipment({ type, make })
+      .then((data) => setEquipment(data))
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [type, make]);
+
+  //filter by tag search client side
+  //useMemo = only recalculate when equipment or search changes
+  const filtered = useMemo(() => {
+    if (!search) return equipment;
+    return equipment.filter((e) =>
+      e.tag.toLowerCase().includes(search.toLocaleLowerCase()),
+    );
+  }, [equipment, search]);
+
+  //useCallback = stable function reference for child component
+  const handleRowClick = useCallback(
+    (id: number) => {
+      navigate(`/equipment/${id}`);
+    },
+    [navigate],
+  );
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div
+      style={{
+        maxWidth: 1100,
+        margin: "0 auto",
+        padding: "40px 16px",
+        fontFamily: "sans-serif",
+      }}
+    >
+      {/* header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ margin: "0 0 4px" }}>Equipment Inventory</h1>
+        <p style={{ margin: 0, color: "#666", fontSize: 14 }}>
+          {loading
+            ? "Loading..."
+            : `${filtered.length} item${filtered.length !== 1 ? "s" : ""} found`}
+        </p>
+      </div>
 
-      <div className="ticks"></div>
+      {/* filters */}
+      <EquipmentFilters
+        type={type}
+        onType={setType}
+        make={make}
+        onMake={setMake}
+        search={search}
+        onSearch={setSearch}
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* error */}
+      {error && <p style={{ color: "red", marginBottom: 16 }}>❌ {error}</p>}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* table */}
+      <EquipmentTable
+        equipment={filtered}
+        loading={loading}
+        onRowClick={handleRowClick}
+      />
+    </div>
+  );
 }
 
-export default App
+// root with routing
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<EquipmentListPage />} />
+        <Route path="/equipment/:id" element={<EquipmentDetail />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

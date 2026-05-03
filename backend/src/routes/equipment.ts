@@ -20,19 +20,19 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 
     if (typeParam) {
       query += ` AND type = $${paramIndex}`;
-      params.push(type as string);
+      params.push(typeParam as string);
       paramIndex++;
     }
 
     if (makeParam) {
       query += ` AND make = $${paramIndex}`;
-      params.push(make as string);
+      params.push(makeParam as string);
       paramIndex++;
     }
 
     if (searchParam) {
       query += ` AND tag ILIKE $${paramIndex}`;
-      params.push(`%${search as string}%`);
+      params.push(`%${searchParam as string}%`);
       paramIndex++;
     }
 
