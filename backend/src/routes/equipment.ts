@@ -9,23 +9,28 @@ const router = Router();
 router.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const { type, make, search } = req.query;
+
+    const typeParam = Array.isArray(type) ? type[0] : type;
+    const makeParam = Array.isArray(make) ? make[0] : make;
+    const searchParam = Array.isArray(search) ? search[0] : search;
+
     let query = "SELECT * FROM equipment WHERE 1=1";
     const params: string[] = [];
     let paramIndex = 1;
 
-    if (type) {
+    if (typeParam) {
       query += ` AND type = $${paramIndex}`;
       params.push(type as string);
       paramIndex++;
     }
 
-    if (make) {
+    if (makeParam) {
       query += ` AND make = $${paramIndex}`;
       params.push(make as string);
       paramIndex++;
     }
 
-    if (search) {
+    if (searchParam) {
       query += ` AND tag ILIKE $${paramIndex}`;
       params.push(`%${search as string}%`);
       paramIndex++;
