@@ -29,9 +29,9 @@ app.use((_req, res) => {
     success: false,
     message: "Route not found",
   });
+});
 
-  // Start Server
-  app.listen(PORT, () => {
-    console.log(`Server running on Port: ${PORT}`);
-  });
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server running on Port: ${PORT}`);
 });
