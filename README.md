@@ -44,7 +44,7 @@ Ensure your local PostgreSQL instance is running. Create a new database for this
 Example using `psql`:
 
 ```sql
-CREATE DATABASE devboard;
+CREATE DATABASE equipment-inventory;
 ```
 
 _(Note: The tables and seeded data will be handled automatically by the backend setup in Step 4)._
@@ -64,7 +64,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=password123
-DB_NAME=devboard
+DB_NAME=equipment-inventory
 ```
 
 Install dependencies:
