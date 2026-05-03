@@ -24,7 +24,7 @@ equipment-inventory/
 ## Prerequisites
 
 - Node.js >= 18.0.0
-- Docker (for PostgreSQL)
+- PostgreSQL (Installed locally)
 
 ---
 
@@ -37,22 +37,17 @@ git clone https://github.com/MofakkarHM/equipment-inventory.git
 cd equipment-inventory
 ```
 
-### 2. Start the database
+### 2. Set up the database
 
-```bash
-docker run --name pg-learning \
-  -e POSTGRES_PASSWORD=password123 \
-  -e POSTGRES_USER=admin \
-  -e POSTGRES_DB=devboard \
-  -p 5432:5432 \
-  -d postgres:15
+Ensure your local PostgreSQL instance is running. Create a new database for this project using your preferred GUI tool (like Beekeeper Studio or pgAdmin).
+
+Example using `psql`:
+
+```sql
+CREATE DATABASE devboard;
 ```
 
-If you already have the container:
-
-```bash
-docker start pg-learning
-```
+_(Note: The tables and seeded data will be handled automatically by the backend setup in Step 4)._
 
 ### 3. Set up backend
 
@@ -61,15 +56,15 @@ cd backend
 cp .env.example .env
 ```
 
-Fill in your `.env` values:
+Fill in your `.env` values (ensure `DB_USER` matches your local Postgres user, default is usually `postgres`):
 
 ```
 PORT=3001
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=admin
+DB_USER=postgres
 DB_PASSWORD=password123
-DB_NAME=
+DB_NAME=devboard
 ```
 
 Install dependencies:
