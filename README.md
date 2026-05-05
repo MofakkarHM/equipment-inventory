@@ -8,7 +8,7 @@ A fullstack equipment inventory management app built with React, Express, TypeSc
 
 | Layer    | Technology                               |
 | -------- | ---------------------------------------- |
-| Frontend | React 18, TypeScript, Vite, React Router |
+| Frontend | React 19, TypeScript, Vite, React Router |
 | Backend  | Node.js 18, Express, TypeScript          |
 | Database | PostgreSQL 15                            |
 | Testing  | Vitest, React Testing Library            |
@@ -19,7 +19,15 @@ A fullstack equipment inventory management app built with React, Express, TypeSc
 equipment-inventory/
 ├── backend/    — Express REST API
 └── frontend/   — React SPA
+	└── src/
+		├── api/         — frontend API client
+		├── components/  — reusable UI components
+		├── pages/       — route-level pages
+		├── types/       — shared frontend types
+		└── test/        — test setup
 ```
+
+Frontend organization note: route-level screens live in `src/pages` (for example, `EquipmentListPage` and `EquipmentDetailPage`), while reusable UI pieces live in `src/components`.
 
 ## Prerequisites
 
@@ -56,7 +64,7 @@ cd backend
 cp .env.example .env
 ```
 
-Fill in your `.env` values (ensure `DB_USER` matches your local Postgres user, default is usually `postgres`):
+Fill in your `.env` values (ensure `DB_USER` matches your local Postgres user):
 
 ```
 PORT=3001
