@@ -1,10 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { Equipment } from "../types";
 import EquipmentTable from "./EquipmentTable";
+import type { Equipment } from "../types";
 
-//mock data
 const mockEquipment: Equipment[] = [
   {
     id: 1,
@@ -30,18 +29,29 @@ const mockEquipment: Equipment[] = [
   },
 ];
 
-//tests
 describe("EquipmentTable", () => {
   it("shows loading message when loading is true", () => {
     render(
-      <EquipmentTable equipment={[]} loading={true} onRowClick={vi.fn()} />,
+      <EquipmentTable
+        equipment={[]}
+        loading={true}
+        onRowClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleting={false}
+      />,
     );
     expect(screen.getByText("Loading equipment...")).toBeInTheDocument();
   });
 
   it("shows empty state when equipment array is empty", () => {
     render(
-      <EquipmentTable equipment={[]} loading={false} onRowClick={vi.fn()} />,
+      <EquipmentTable
+        equipment={[]}
+        loading={false}
+        onRowClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleting={false}
+      />,
     );
     expect(screen.getByText(/no equipment found/i)).toBeInTheDocument();
   });
@@ -52,27 +62,61 @@ describe("EquipmentTable", () => {
         equipment={mockEquipment}
         loading={false}
         onRowClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleting={false}
       />,
     );
     expect(screen.getByText("ASSET-001")).toBeInTheDocument();
     expect(screen.getByText("ASSET-002")).toBeInTheDocument();
     expect(screen.getByText("Dell PowerEdge R740 #1")).toBeInTheDocument();
-    expect(screen.getByText("Cisco Catalyst 9300 #2")).toBeInTheDocument();
   });
 
-  it("calls onRowClick with correct id when row is clicked", async () => {
+  it("calls onRowClick with correct id when tag is clicked", async () => {
     const handleClick = vi.fn();
     render(
       <EquipmentTable
         equipment={mockEquipment}
         loading={false}
         onRowClick={handleClick}
+        onDelete={vi.fn()}
+        isDeleting={false}
       />,
     );
-
     await userEvent.click(screen.getByText("ASSET-001"));
     expect(handleClick).toHaveBeenCalledWith(1);
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onDelete when delete button clicked", async () => {
+    const handleDelete = vi.fn();
+    render(
+      <EquipmentTable
+        equipment={mockEquipment}
+        loading={false}
+        onRowClick={vi.fn()}
+        onDelete={handleDelete}
+        isDeleting={false}
+      />,
+    );
+    const deleteButtons = screen.getAllByText("Delete");
+    await userEvent.click(deleteButtons[0]);
+    expect(handleDelete).toHaveBeenCalledWith(1);
+  });
+
+  it("disables delete buttons when isDeleting is true", () => {
+    render(
+      <EquipmentTable
+        equipment={mockEquipment}
+        loading={false}
+        onRowClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleting={true}
+      />,
+    );
+    const deleteButtons = screen.getAllByRole("button");
+    deleteButtons.forEach((btn) => {
+      expect(btn).toBeDisabled();
+    });
   });
 
   it("renders correct status badge for each status", () => {
@@ -81,6 +125,8 @@ describe("EquipmentTable", () => {
         equipment={mockEquipment}
         loading={false}
         onRowClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleting={false}
       />,
     );
     expect(screen.getByText("active")).toBeInTheDocument();

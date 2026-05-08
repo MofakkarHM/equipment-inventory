@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Equipment } from "../types";
-import { fetchEquipment } from "../api/equipment";
+import { deleteEquipment, fetchEquipment } from "../api/equipment";
 import EquipmentFilters from "../components/EquipmentFilters";
 import EquipmentTable from "../components/EquipmentTable";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { equipmentKeys } from "../api/queryKeys";
 
 export default function EquipmentListPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   //data state
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  // const [equipment, setEquipment] = useState<Equipment[]>([]);
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string>("");
 
   //filter state
   const [type, setType] = useState<string>("");
@@ -20,12 +22,36 @@ export default function EquipmentListPage() {
 
   //fetch from API when type or make changes
   //search is handled client side with useMemo
-  useEffect(() => {
-    fetchEquipment({ type, make })
-      .then((data) => setEquipment(data))
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [type, make]);
+  // useEffect(() => {
+  //   fetchEquipment({ type, make })
+  //     .then((data) => setEquipment(data))
+  //     .catch((err: Error) => setError(err.message))
+  //     .finally(() => setLoading(false));
+  // }, [type, make]);
+
+  //TanStack Query
+  const {
+    data: equipment = [],
+    isLoading: loading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: equipmentKeys.list({ type, make }),
+    queryFn: () => fetchEquipment({ type, make }),
+  });
+
+  //useMutation for delete
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteEquipment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: equipmentKeys.lists(),
+      });
+    },
+    onError: (err: Error) => {
+      alert(`Delete failed: ${err.message}`);
+    },
+  });
 
   //filter by tag search client side
   //useMemo = only recalculate when equipment or search changes
@@ -44,6 +70,14 @@ export default function EquipmentListPage() {
     [navigate],
   );
 
+  const handleDelete = useCallback(
+    (id: number) => {
+      if (!confirm("Delete this equipment?")) return;
+      deleteMutation.mutate(id);
+    },
+    [deleteMutation],
+  );
+
   return (
     <div
       style={{
@@ -53,7 +87,6 @@ export default function EquipmentListPage() {
         fontFamily: "sans-serif",
       }}
     >
-      {/* header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ margin: "0 0 4px" }}>Equipment Inventory</h1>
         <p style={{ margin: 0, color: "#666", fontSize: 14 }}>
@@ -63,7 +96,6 @@ export default function EquipmentListPage() {
         </p>
       </div>
 
-      {/* filters */}
       <EquipmentFilters
         type={type}
         onType={setType}
@@ -73,14 +105,18 @@ export default function EquipmentListPage() {
         onSearch={setSearch}
       />
 
-      {/* error */}
-      {error && <p style={{ color: "red", marginBottom: 16 }}>❌ {error}</p>}
+      {isError && (
+        <p style={{ color: "red", marginBottom: 16 }}>
+          ❌ {(error as Error).message}
+        </p>
+      )}
 
-      {/* table */}
       <EquipmentTable
         equipment={filtered}
         loading={loading}
         onRowClick={handleRowClick}
+        onDelete={handleDelete}
+        isDeleting={deleteMutation.isPending}
       />
     </div>
   );

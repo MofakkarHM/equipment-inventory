@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import type { Equipment } from "../types";
+import { useQuery } from "@tanstack/react-query";
 import { fetchEquipmentById } from "../api/equipment";
+import { equipmentKeys } from "../api/queryKeys";
 
-//detail row helper component
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -23,25 +22,22 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-//main component
 export default function EquipmentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [item, setItem] = useState<Equipment | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  // useQuery
+  const {
+    data: item,
+    isLoading: loading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: equipmentKeys.detail(Number(id)),
+    queryFn: () => fetchEquipmentById(Number(id)),
+    enabled: !!id && !isNaN(Number(id)),
+  });
 
-  useEffect(() => {
-    if (!id) return;
-
-    fetchEquipmentById(Number(id))
-      .then((data) => setItem(data))
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  //loading
   if (loading) {
     return (
       <div style={{ padding: 40, fontFamily: "sans-serif" }}>
@@ -50,17 +46,16 @@ export default function EquipmentDetail() {
     );
   }
 
-  //error
-  if (error) {
+  if (isError) {
     return (
       <div style={{ padding: 40, fontFamily: "sans-serif" }}>
         <button
           onClick={() => navigate("/")}
           style={{ marginBottom: 16, padding: "8px 16px", cursor: "pointer" }}
         >
-          Back to list
+          ← Back to list
         </button>
-        <p style={{ color: "red" }}>{error}</p>
+        <p style={{ color: "red" }}>❌ {(error as Error).message}</p>
       </div>
     );
   }
@@ -84,7 +79,6 @@ export default function EquipmentDetail() {
     ],
   ];
 
-  //detail view
   return (
     <div
       style={{

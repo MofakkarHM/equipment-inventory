@@ -4,6 +4,8 @@ interface EquipmentTableProps {
   equipment: Equipment[];
   loading: boolean;
   onRowClick: (id: number) => void;
+  onDelete: (id: number) => void;
+  isDeleting: boolean;
 }
 
 // ── status badge colour helper ────────────────────────────────────
@@ -31,6 +33,8 @@ export default function EquipmentTable({
   equipment,
   loading,
   onRowClick,
+  onDelete,
+  isDeleting,
 }: EquipmentTableProps) {
   //loading state
   if (loading) {
@@ -63,7 +67,6 @@ export default function EquipmentTable({
     );
   }
 
-  //Table
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -87,34 +90,28 @@ export default function EquipmentTable({
             ))}
           </tr>
         </thead>
-
         <tbody>
           {equipment.map((item) => (
-            <tr
-              key={item.id}
-              onClick={() => onRowClick(item.id)}
-              style={{
-                borderBottom: "1px solid #f0f0f0",
-                cursor: "pointer",
-                transition: "background 0.1s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#f8f9fa";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "white";
-              }}
-            >
+            <tr key={item.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
               <td
+                onClick={() => onRowClick(item.id)}
                 style={{
                   padding: "12px 16px",
                   fontSize: 13,
                   fontFamily: "monospace",
+                  cursor: "pointer",
                 }}
               >
                 {item.tag}
               </td>
-              <td style={{ padding: "12px 16px", fontSize: 13 }}>
+              <td
+                onClick={() => onRowClick(item.id)}
+                style={{
+                  padding: "12px 16px",
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
                 {item.name}
               </td>
               <td style={{ padding: "12px 16px", fontSize: 13 }}>
@@ -131,6 +128,24 @@ export default function EquipmentTable({
               </td>
               <td style={{ padding: "12px 16px", fontSize: 13 }}>
                 <span style={getStatusStyle(item.status)}>{item.status}</span>
+              </td>
+              <td style={{ padding: "12px 16px", fontSize: 13 }}>
+                <button
+                  onClick={() => onDelete(item.id)}
+                  disabled={isDeleting}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 4,
+                    border: "1px solid #dc3545",
+                    background: "white",
+                    color: "#dc3545",
+                    cursor: isDeleting ? "not-allowed" : "pointer",
+                    fontSize: 12,
+                    opacity: isDeleting ? 0.6 : 1,
+                  }}
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
               </td>
             </tr>
           ))}
