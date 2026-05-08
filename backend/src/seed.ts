@@ -5,16 +5,16 @@ async function seed(): Promise<void> {
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS equipment(
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(50) NOT NULL,
-      type VARCHAR(30) NOT NULL,
-      make VARCHAR(30) NOT NULL,
-      model VARCHAR(30) NOT NULL,
-      tag VARCHAR(30) NOT NULL UNIQUE,
-      location VARCHAR(30) NOT NULL,
-      status VARCHAR(15) NOT NULL DEFAULT 'active',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    )
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(30) NOT NULL,
+  make VARCHAR(30) NOT NULL,
+  model VARCHAR(100) NOT NULL,
+  tag VARCHAR(50) NOT NULL UNIQUE,
+  location VARCHAR(100) NOT NULL,
+  status VARCHAR(15) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+)
   `);
 
   console.log("Table ready");
