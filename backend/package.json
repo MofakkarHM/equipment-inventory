@@ -6,7 +6,7 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed": "ts-node src/seed.ts",
+    "seed": "node dist/seed.js",
     "lint": "eslint src --ext .ts",
     "playground": "ts-node src/zod-playground.ts"
   },
